@@ -21,6 +21,7 @@ command_fn find_command_fn(const string &cmd) {
     // Note: value_type is pair<const key_type, mapped_type>
     // So: iterator->first is key_type (string)
     // So: iterator->second is mapped_type (command_fn)
+
     DEBUGF ('c', "[" << cmd << "]");
     const auto result = cmd_hash.find(cmd);
     if (result == cmd_hash.end()) {

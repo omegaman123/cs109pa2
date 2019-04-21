@@ -63,6 +63,10 @@ int main (int argc, char** argv) {
                break;
             }
             if (need_echo) cout << line << endl;
+
+            if (line.at(0) == '#'){
+                continue;
+            }
    
             // Split the line into words and lookup the appropriate
             // function.  Complain or call it.

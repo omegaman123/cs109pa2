@@ -38,6 +38,10 @@ ostream& operator<< (ostream& out, const inode_state& state) {
    return out;
 }
 
+void inode_state::set_prompt(const string & newPrompt) {
+    this->prompt_ = newPrompt;
+}
+
 inode::inode(file_type type): inode_nr (next_inode_nr++) {
    switch (type) {
       case file_type::PLAIN_TYPE:

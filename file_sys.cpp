@@ -86,7 +86,7 @@ void plain_file::remove (const string&) {
    throw file_error ("is a plain file");
 }
 
-inode_ptr plain_file::mkdir (const string&) {
+inode_ptr plain_file::mkdir (inode_ptr parent, const string&) {
    throw file_error ("is a plain file");
 }
 

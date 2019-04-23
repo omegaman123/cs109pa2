@@ -1,3 +1,3 @@
-/Users/markmedved/Desktop/CMPS109/cs109pa2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/Users/markmedved/Desktop/CMPS109/cs109pa2/cmake-build-debug/CMakeFiles/edit_cache.dir
-/Users/markmedved/Desktop/CMPS109/cs109pa2/cmake-build-debug/CMakeFiles/cs109pa2.dir
+/home/mark/mac/Desktop/cs109pa2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/mark/mac/Desktop/cs109pa2/cmake-build-debug/CMakeFiles/cs109pa2.dir
+/home/mark/mac/Desktop/cs109pa2/cmake-build-debug/CMakeFiles/edit_cache.dir

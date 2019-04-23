@@ -64,14 +64,13 @@ int main (int argc, char** argv) {
             }
             if (need_echo) cout << line << endl;
 
-            if (line.at(0) == '#'){
-                continue;
-            }
-   
             // Split the line into words and lookup the appropriate
             // function.  Complain or call it.
             wordvec words = split (line, " \t");
             DEBUGF ('y', "words = " << words);
+            if(words.size() == 0 or words[0].at(0) == '#'){
+                continue;
+            }
             command_fn fn = find_command_fn (words.at(0));
             fn (state, words);
          }catch (command_error& error) {

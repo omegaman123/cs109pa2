@@ -25,9 +25,28 @@ ostream& operator<< (ostream& out, file_type type) {
    return out << hash[type];
 }
 
+inode_ptr directory::mk_root_dir() {
+    inode_ptr dir(new inode(file_type::DIRECTORY_TYPE));
+
+    auto nd = dynamic_cast<directory*>(dir.get()->get_contents().get());
+    nd->dirents["."] = dir;
+    nd->dirents[".."] = dir;
+
+    return dir;
+}
+
 inode_state::inode_state() {
-   DEBUGF ('i', "root = " << root << ", cwd = " << cwd
-          << ", prompt = \"" << prompt() << "\"");
+    root = directory::mk_root_dir();
+    cwd = root;
+
+    DEBUGF ('i', "root = " << root << ", cwd = " << cwd
+    << ", prompt = \"" << prompt() << "\"");
+}
+const inode_ptr& inode_state::get_cwd() const {
+    return this->cwd;
+}
+const inode_ptr& inode_state::get_root() const {
+    return this->root;
 }
 
 const string& inode_state::prompt() const { return prompt_; }
@@ -53,8 +72,9 @@ inode::inode(file_type type): inode_nr (next_inode_nr++) {
    }
    DEBUGF ('i', "inode " << inode_nr << ", type = " << type);
 }
-map<string,inode_ptr>& directory::getDirents()  {
-    return this->dirents;
+
+base_file_ptr inode::get_contents() const {
+    return contents;
 }
 
 int inode::get_inode_nr() const {
@@ -115,9 +135,15 @@ void directory::remove (const string& filename) {
 
 inode_ptr directory::mkdir (inode_ptr parent, const string& dirname) {
    DEBUGF ('i', dirname);
-    inode_ptr dir(new inode(file_type::DIRECTORY_TYPE));
 
-    return nullptr;
+    inode_ptr dir(new inode(file_type::DIRECTORY_TYPE));
+    this->dirents.insert(pair<string, inode_ptr>(dirname, dir));
+
+    auto nd = dynamic_cast<directory*>(dir.get()->get_contents().get());
+    nd->dirents["."] = dir;
+    nd->dirents[".."] = parent;
+
+    return dir;
 }
 
 inode_ptr directory::mkfile (const string& filename) {

@@ -68,10 +68,10 @@ void fn_exit(inode_state &state, const wordvec &words) {
             int i = std::stoi(words[1]);
             exit_status::set(i);
 
-        } catch (std::invalid_argument) {
+        } catch (std::invalid_argument &) {
             exit_status::set(127);
         }
-    } else{
+    } else {
         throw command_error(words[0] + ": invalid number of arguments");
     }
     throw ysh_exit();
@@ -95,9 +95,9 @@ void fn_make(inode_state &state, const wordvec &words) {
 void fn_mkdir(inode_state &state, const wordvec &words) {
     DEBUGF ('c', state);
     DEBUGF ('c', words);
-
-
-
+    auto cwinode = state.get_cwd();
+    auto content = cwinode.get()->get_contents();
+    auto newdir = content.get()->mkdir(cwinode, words.at(1));
 }
 
 void fn_prompt(inode_state &state, const wordvec &words) {

@@ -41,6 +41,8 @@ class inode_state {
       inode_state (const inode_state&) = delete; // copy ctor
       inode_state& operator= (const inode_state&) = delete; // op=
       inode_state();
+      const inode_ptr& get_cwd() const;
+      const inode_ptr& get_root() const;
       const string& prompt() const;
       void set_prompt(const string&);
 };
@@ -67,6 +69,7 @@ class inode {
    public:
       inode (file_type);
       int get_inode_nr() const;
+      base_file_ptr get_contents() const;
 };
 
 
@@ -139,7 +142,7 @@ class directory: public base_file {
       // Must be a map, not unordered_map, so printing is lexicographic
       map<string,inode_ptr> dirents;
    public:
-      map<string,inode_ptr>& getDirents();
+      static inode_ptr mk_root_dir();
       virtual size_t size() const override;
       virtual const wordvec& readfile() const override;
       virtual void writefile (const wordvec& newdata) override;

@@ -53,6 +53,9 @@ inode::inode(file_type type): inode_nr (next_inode_nr++) {
    }
    DEBUGF ('i', "inode " << inode_nr << ", type = " << type);
 }
+map<string,inode_ptr>& directory::getDirents()  {
+    return this->dirents;
+}
 
 int inode::get_inode_nr() const {
    DEBUGF ('i', "inode = " << inode_nr);
@@ -110,9 +113,11 @@ void directory::remove (const string& filename) {
    DEBUGF ('i', filename);
 }
 
-inode_ptr directory::mkdir (const string& dirname) {
+inode_ptr directory::mkdir (inode_ptr parent, const string& dirname) {
    DEBUGF ('i', dirname);
-   return nullptr;
+    inode_ptr dir(new inode(file_type::DIRECTORY_TYPE));
+
+    return nullptr;
 }
 
 inode_ptr directory::mkfile (const string& filename) {

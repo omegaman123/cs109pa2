@@ -91,7 +91,7 @@ class base_file {
       virtual const wordvec& readfile() const = 0;
       virtual void writefile (const wordvec& newdata) = 0;
       virtual void remove (const string& filename) = 0;
-      virtual inode_ptr mkdir (const string& dirname) = 0;
+      virtual inode_ptr mkdir (inode_ptr parent, const string& dirname) = 0;
       virtual inode_ptr mkfile (const string& filename) = 0;
 };
 
@@ -112,7 +112,7 @@ class plain_file: public base_file {
       virtual const wordvec& readfile() const override;
       virtual void writefile (const wordvec& newdata) override;
       virtual void remove (const string& filename) override;
-      virtual inode_ptr mkdir (const string& dirname) override;
+      virtual inode_ptr mkdir (inode_ptr parent, const string& dirname) override;
       virtual inode_ptr mkfile (const string& filename) override;
 };
 
@@ -139,11 +139,12 @@ class directory: public base_file {
       // Must be a map, not unordered_map, so printing is lexicographic
       map<string,inode_ptr> dirents;
    public:
+      map<string,inode_ptr>& getDirents();
       virtual size_t size() const override;
       virtual const wordvec& readfile() const override;
       virtual void writefile (const wordvec& newdata) override;
       virtual void remove (const string& filename) override;
-      virtual inode_ptr mkdir (const string& dirname) override;
+      virtual inode_ptr mkdir (inode_ptr parent, const string& dirname) override;
       virtual inode_ptr mkfile (const string& filename) override;
 };
 

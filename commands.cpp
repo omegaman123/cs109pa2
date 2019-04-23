@@ -90,6 +90,11 @@ void fn_lsr(inode_state &state, const wordvec &words) {
 void fn_make(inode_state &state, const wordvec &words) {
     DEBUGF ('c', state);
     DEBUGF ('c', words);
+    auto cwinode = state.get_cwd();
+    auto content = cwinode.get()->get_contents();
+    auto newfile = content.get()->mkfile(words.at(1));
+    newfile.get()->get_contents().get()->writefile(words);
+
 }
 
 void fn_mkdir(inode_state &state, const wordvec &words) {

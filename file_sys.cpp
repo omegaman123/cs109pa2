@@ -100,6 +100,10 @@ const wordvec& plain_file::readfile() const {
 
 void plain_file::writefile (const wordvec& words) {
    DEBUGF ('i', words);
+    for (int i = 2; i < words.size() ; ++i) {
+        data.push_back(words[i]);
+    }
+
 }
 
 void plain_file::remove (const string&) {
@@ -112,6 +116,7 @@ inode_ptr plain_file::mkdir (inode_ptr parent, const string&) {
 
 inode_ptr plain_file::mkfile (const string&) {
    throw file_error ("is a plain file");
+
 }
 
 
@@ -148,6 +153,8 @@ inode_ptr directory::mkdir (inode_ptr parent, const string& dirname) {
 
 inode_ptr directory::mkfile (const string& filename) {
    DEBUGF ('i', filename);
-   return nullptr;
+    inode_ptr file(new inode(file_type::PLAIN_TYPE));
+    this->dirents[filename] = file;
+    return file;
 }
 

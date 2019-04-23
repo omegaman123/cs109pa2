@@ -95,6 +95,9 @@ void fn_make(inode_state &state, const wordvec &words) {
 void fn_mkdir(inode_state &state, const wordvec &words) {
     DEBUGF ('c', state);
     DEBUGF ('c', words);
+
+
+
 }
 
 void fn_prompt(inode_state &state, const wordvec &words) {

@@ -41,6 +41,7 @@ class inode_state {
       inode_state (const inode_state&) = delete; // copy ctor
       inode_state& operator= (const inode_state&) = delete; // op=
       inode_state();
+      void set_cwd(inode_ptr ptr);
       const inode_ptr& get_cwd() const;
       const inode_ptr& get_root() const;
       const string& prompt() const;
@@ -141,7 +142,9 @@ class directory: public base_file {
    private:
       // Must be a map, not unordered_map, so printing is lexicographic
       map<string,inode_ptr> dirents;
+      string name;
    public:
+      string get_name();
       static inode_ptr mk_root_dir();
       virtual size_t size() const override;
       virtual const wordvec& readfile() const override;

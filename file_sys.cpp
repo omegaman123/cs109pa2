@@ -31,8 +31,13 @@ inode_ptr directory::mk_root_dir() {
     auto nd = dynamic_cast<directory*>(dir.get()->get_contents().get());
     nd->dirents["."] = dir;
     nd->dirents[".."] = dir;
+    nd->name = "root";
 
     return dir;
+}
+void inode_state::set_cwd(inode_ptr ptr) {
+
+    this->cwd = ptr;
 }
 
 inode_state::inode_state() {
@@ -151,8 +156,12 @@ inode_ptr directory::mkdir (inode_ptr parent, const string& dirname) {
     auto nd = dynamic_cast<directory*>(dir.get()->get_contents().get());
     nd->dirents["."] = dir;
     nd->dirents[".."] = parent;
+    nd->name = dirname;
 
     return dir;
+}
+string directory::get_name() {
+    return this->name;
 }
 
 inode_ptr directory::mkfile (const string& filename) {

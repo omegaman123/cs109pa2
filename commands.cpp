@@ -80,6 +80,21 @@ void fn_exit(inode_state &state, const wordvec &words) {
 void fn_ls(inode_state &state, const wordvec &words) {
     DEBUGF ('c', state);
     DEBUGF ('c', words);
+    auto cwinode = state.get_cwd();
+    auto content = cwinode.get()->get_contents();
+    auto dir = dynamic_cast<directory*>(content.get());
+    if (words.size() > 1){
+
+    } else{
+    auto dirents = dir->get_dirents();
+        for (auto it = dirents.begin(); it != dirents.end(); ++it) {
+            auto item = *it;
+
+            cout << '\t' << item.second.get()->get_inode_nr() << '\t' <<
+            item.second.get()->get_contents().get()->size() << '\t' <<
+            item.first << endl;
+        }
+    }
 }
 
 void fn_lsr(inode_state &state, const wordvec &words) {

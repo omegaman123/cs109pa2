@@ -149,6 +149,7 @@ class directory: public base_file {
       virtual void remove (const string& filename) override;
       virtual inode_ptr mkdir (inode_ptr parent, const string& dirname) override;
       virtual inode_ptr mkfile (const string& filename) override;
+      const map<string,inode_ptr>& get_dirents() const;
 };
 
 #endif

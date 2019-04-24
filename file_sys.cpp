@@ -100,7 +100,7 @@ const wordvec& plain_file::readfile() const {
 
 void plain_file::writefile (const wordvec& words) {
    DEBUGF ('i', words);
-    for (int i = 2; i < words.size() ; ++i) {
+    for (uint i = 2; i < words.size() ; ++i) {
         data.push_back(words[i]);
     }
 
@@ -124,6 +124,10 @@ size_t directory::size() const {
    size_t size {0};
    DEBUGF ('i', "size = " << size);
    return size;
+}
+
+const map<string,inode_ptr>& directory::get_dirents() const {
+    return this->dirents;
 }
 
 const wordvec& directory::readfile() const {

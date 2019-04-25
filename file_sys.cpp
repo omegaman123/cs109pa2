@@ -111,6 +111,10 @@ void plain_file::writefile (const wordvec& words) {
 
 }
 
+const wordvec& plain_file::get_data() {
+    return this->data;
+}
+
 void plain_file::remove (const string&) {
    throw file_error ("is a plain file");
 }

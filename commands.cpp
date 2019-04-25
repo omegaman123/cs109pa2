@@ -45,6 +45,34 @@ int exit_status_message() {
 void fn_cat(inode_state &state, const wordvec &words) {
     DEBUGF ('c', state);
     DEBUGF ('c', words);
+    auto cwinode = state.get_cwd();
+    auto content = cwinode.get()->get_contents();
+    auto dir = dynamic_cast<directory *>(content.get());
+    if (words.size() > 2){
+        throw exception{};
+    }
+
+    string filename = words.at(1);
+    auto cnt = dir->get_dirents().at(filename);
+    auto file = dynamic_cast<plain_file *>(cnt.get()->get_contents().get());
+    if (file == nullptr){
+        cout << "not a file" << endl;
+    }
+    try {
+        auto data = file->get_data();
+        for (int i = 0; i < data.size(); ++i) {
+            cout << data.at(i);
+            if (i <data.size() - 1){
+                cout <<" ";
+            }
+        }
+        cout << endl;
+    } catch(exception& e) {
+       cout << e.what() << endl;
+        return;
+    }
+
+
 }
 
 void fn_cd(inode_state &state, const wordvec &words) {
@@ -52,11 +80,7 @@ void fn_cd(inode_state &state, const wordvec &words) {
     DEBUGF ('c', words);
 
 
-    if (words.size() == 1){
-        state.set_cwd(state.get_root());
-        return;
-    }
-    if (words.at(1) == "/" or (words.size() == 1) ){
+    if ((words.size() == 1) or ((words.size()) == 2) and (words.at(1) == "/")) {
         state.set_cwd(state.get_root());
         return;
     }
@@ -194,7 +218,7 @@ void fn_pwd(inode_state &state, const wordvec &words) {
     } else {
         auto dirents = dir->get_dirents();
         if (cwinode.get()->get_inode_nr() == 1) {
-            cout << ":/" << endl;
+            cout << "/" << endl;
         } else {
             auto rootnode = state.get_root();
             auto currnode = state.get_cwd();

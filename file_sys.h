@@ -113,6 +113,7 @@ class plain_file: public base_file {
       wordvec data;
    public:
       virtual size_t size() const override;
+      const wordvec& get_data();
       virtual const wordvec& readfile() const override;
       virtual void writefile (const wordvec& newdata) override;
       virtual void remove (const string& filename) override;

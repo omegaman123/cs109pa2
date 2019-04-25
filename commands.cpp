@@ -2,6 +2,8 @@
 
 #include "commands.h"
 #include "debug.h"
+#include <iostream>
+#include <iomanip>
 
 command_hash cmd_hash{
         {"cat",    fn_cat},
@@ -49,16 +51,16 @@ void fn_cd(inode_state &state, const wordvec &words) {
     DEBUGF ('c', state);
     DEBUGF ('c', words);
 
-    if (words.size() > 2){
+    if (words.size() > 2) {
         //error
-    } else if (words.size() == 2){
+    } else if (words.size() == 2) {
         auto cwinode = state.get_cwd();
         auto content = cwinode.get()->get_contents();
-        auto dir = dynamic_cast<directory*>(content.get());
+        auto dir = dynamic_cast<directory *>(content.get());
         try {
             auto ncwd = dir->get_dirents().at(words.at(1));
             state.set_cwd(ncwd);
-        } catch (exception& e){
+        } catch (exception &e) {
             cout << e.what();
         }
     }
@@ -96,36 +98,44 @@ void fn_ls(inode_state &state, const wordvec &words) {
     DEBUGF ('c', words);
     auto cwinode = state.get_cwd();
     auto content = cwinode.get()->get_contents();
-    auto dir = dynamic_cast<directory*>(content.get());
-    if (words.size() > 1){
+    auto dir = dynamic_cast<directory *>(content.get());
+    if (words.size() > 1) {
 
-    } else{
-    auto dirents = dir->get_dirents();
-    if (cwinode.get()->get_inode_nr() == 1){
-        cout << ":/" << endl;
     } else {
-        auto rootnode = state.get_root();
-        auto currnode = state.get_cwd();
-        auto cnt = content;
-        auto currDir = dir;
-        wordvec v;
-        while (rootnode.get()->get_inode_nr() != currnode.get()->get_inode_nr()){
-        cnt = currnode.get()->get_contents();
-        currDir =  dynamic_cast<directory*>(cnt.get());
-        currnode = currDir->get_dirents().at("..");
-        v.push_back(currDir->get_name());
+        auto dirents = dir->get_dirents();
+        if (cwinode.get()->get_inode_nr() == 1) {
+            cout << "/:" << endl;
+        } else {
+            auto rootnode = state.get_root();
+            auto currnode = state.get_cwd();
+            auto cnt = content;
+            auto currDir = dir;
+            wordvec v;
+            while (rootnode.get()->get_inode_nr() != currnode.get()->get_inode_nr()) {
+                cnt = currnode.get()->get_contents();
+                currDir = dynamic_cast<directory *>(cnt.get());
+                currnode = currDir->get_dirents().at("..");
+                v.push_back(currDir->get_name());
+            }
+
+            for (int i = v.size() - 1; i >= 0; --i) {
+                cout << "/" << v.at(i) ;
+            }
+            cout <<  ":" << endl;
         }
-        cout << ":/";
-        for (int i = v.size() - 1; i >= 0; --i) {
-            cout << v.at(i) << "/";
-        }
-        cout << endl;
-    }
         for (auto it = dirents.begin(); it != dirents.end(); ++it) {
             auto item = *it;
-            cout << '\t' << item.second.get()->get_inode_nr() << '\t' <<
-            item.second.get()->get_contents().get()->size() << '\t' <<
-            item.first << endl;
+            cout << right << setw(6) << item.second.get()->get_inode_nr() << "  " <<
+                 setw(6) << item.second.get()->get_contents().get()->size() << "  " <<
+                 left << item.first;
+
+            auto dr = dynamic_cast<directory *>(item.second.get()->get_contents().get());
+            if (dr != 0){
+                if (item.first != ".." and item.first != "."){
+                    cout << "/";
+                }
+            }
+                cout << endl;
         }
     }
 }
@@ -168,8 +178,8 @@ void fn_pwd(inode_state &state, const wordvec &words) {
     DEBUGF ('c', words);
     auto cwinode = state.get_cwd();
     auto content = cwinode.get()->get_contents();
-    auto dir = dynamic_cast<directory*>(content.get());
-    if (words.size() > 1){
+    auto dir = dynamic_cast<directory *>(content.get());
+    if (words.size() > 1) {
 
     } else {
         auto dirents = dir->get_dirents();
@@ -187,9 +197,9 @@ void fn_pwd(inode_state &state, const wordvec &words) {
                 currnode = currDir->get_dirents().at("..");
                 v.push_back(currDir->get_name());
             }
-            cout << ":/";
+
             for (int i = v.size() - 1; i >= 0; --i) {
-                cout << v.at(i) << "/";
+                cout << "/" << v.at(i) ;
             }
             cout << endl;
         }

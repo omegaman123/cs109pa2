@@ -51,6 +51,16 @@ void fn_cd(inode_state &state, const wordvec &words) {
     DEBUGF ('c', state);
     DEBUGF ('c', words);
 
+
+    if (words.size() == 1){
+        state.set_cwd(state.get_root());
+        return;
+    }
+    if (words.at(1) == "/" or (words.size() == 1) ){
+        state.set_cwd(state.get_root());
+        return;
+    }
+
     if (words.size() > 2) {
         //error
     } else if (words.size() == 2) {

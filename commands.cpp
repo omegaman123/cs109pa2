@@ -240,7 +240,27 @@ void fn_pwd(inode_state &state, const wordvec &words) {
 void fn_rm(inode_state &state, const wordvec &words) {
     DEBUGF ('c', state);
     DEBUGF ('c', words);
-    
+    auto cwinode = state.get_cwd();
+    auto content = cwinode.get()->get_contents();
+    auto dir = dynamic_cast<directory *>(content.get());
+    auto dirmap = dir->get_dirents();
+    string s = words.at(1);
+    try {
+        auto cnt = dirmap[s].get()->get_contents();
+
+        if (dynamic_cast<directory *>(cnt.get()) != 0){
+           auto del = dynamic_cast<directory *>(cnt.get());
+            //dir
+            if (del->size() > 2){
+                throw command_error(words.at(0) + ": dir not empty");
+            }
+
+        }
+        dirmap.erase(s);
+    }
+    catch (exception& e){
+    throw command_error(words.at(0) + ": not found");
+    }
 }
 
 void fn_rmr(inode_state &state, const wordvec &words) {

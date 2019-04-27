@@ -93,9 +93,12 @@ file_error::file_error (const string& what):
 }
 
 size_t plain_file::size() const {
-   size_t size {0};
-   DEBUGF ('i', "size = " << size);
-   return size;
+    uint i = 0;
+    for (string s: this->data){
+    i += s.size();
+    }
+    i += this->data.size()-1;
+    return size_t {i};
 }
 
 const wordvec& plain_file::readfile() const {
@@ -130,12 +133,10 @@ inode_ptr plain_file::mkfile (const string&) {
 
 
 size_t directory::size() const {
-   size_t size {0};
-   DEBUGF ('i', "size = " << size);
-   return size;
+   return this->dirents.size();
 }
 
-const map<string,inode_ptr>& directory::get_dirents() const {
+ map<string,inode_ptr>& directory::get_dirents()  {
     return this->dirents;
 }
 
@@ -164,7 +165,7 @@ inode_ptr directory::mkdir (inode_ptr parent, const string& dirname) {
 
     return dir;
 }
-string directory::get_name() {
+const string directory::get_name() {
     return this->name;
 }
 

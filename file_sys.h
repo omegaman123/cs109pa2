@@ -145,6 +145,7 @@ class directory: public base_file {
       map<string,inode_ptr> dirents;
       string name;
    public:
+      void remove(wordvec &pathname, inode_state& state);
       const string get_name();
       static inode_ptr mk_root_dir();
       virtual size_t size() const override;
@@ -154,6 +155,7 @@ class directory: public base_file {
       virtual inode_ptr mkdir (inode_ptr parent, const string& dirname) override;
       virtual inode_ptr mkfile (const string& filename) override;
        map<string,inode_ptr>& get_dirents() ;
+       const inode_ptr search(wordvec pathname, inode_state& state);
 };
 
 #endif

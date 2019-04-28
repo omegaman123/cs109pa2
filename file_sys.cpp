@@ -3,6 +3,10 @@
 #include <iostream>
 #include <stdexcept>
 #include <unordered_map>
+#include "commands.h"
+#include "debug.h"
+#include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -167,6 +171,54 @@ inode_ptr directory::mkdir (inode_ptr parent, const string& dirname) {
 }
 const string directory::get_name() {
     return this->name;
+}
+
+void directory::remove(wordvec& pathname, inode_state& state) {
+    auto cwinode = state.get_cwd();
+    auto content = cwinode.get()->get_contents();
+    auto dir = dynamic_cast<directory *>(content.get());
+    auto dirmap = dir->get_dirents();
+    string s = pathname.at(1);
+    try {
+        auto cnt = dirmap[s].get()->get_contents();
+
+        if (dynamic_cast<directory *>(cnt.get()) != 0){
+            auto del = dynamic_cast<directory *>(cnt.get());
+            //dir
+            if (del->size() > 2){
+                throw command_error(": dir not empty");
+            }
+
+        }
+        dirmap.erase(s);
+    }
+    catch (exception& e){
+        throw command_error(pathname.at(0) + ": not found");
+    }
+}
+
+const inode_ptr directory::search(wordvec pathname, inode_state& state) {
+    auto cwinode = state.get_cwd();
+    auto searchnode = state.get_cwd();
+    string target = pathname.back();
+    pathname.pop_back();
+    for (int i = 0; i < pathname.size(); ++i) {
+        auto content = searchnode.get()->get_contents();
+        auto dir = dynamic_cast<directory *>(content.get());
+        auto dirmap = dir->get_dirents();
+        try {
+            searchnode = dirmap.at(pathname.at(i));
+        } catch (exception& e){
+            //not found
+        }
+    }
+    auto searchdir = dynamic_cast<directory *>(searchnode.get()->get_contents().get());
+    try{
+        return searchdir->get_dirents().at(target);
+    } catch (exception& e){
+
+    }
+
 }
 
 inode_ptr directory::mkfile (const string& filename) {

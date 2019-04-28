@@ -51,10 +51,10 @@ void fn_cat(inode_state &state, const wordvec &words) {
     if (words.size() > 2){
         throw exception{};
     }
-    string filename = words.at(1);
+    auto pathname = split(words.at(1),"/");
     try {
-        auto cnt = dir->get_dirents().at(filename);
-        auto file = dynamic_cast<plain_file *>(cnt.get()->get_contents().get());
+        auto dest = dir->search(pathname,state);
+        auto file = dynamic_cast<plain_file *>(dest.get()->get_contents().get());
         if (file == nullptr){
             cout << "not a file" << endl;
             return;
@@ -85,11 +85,12 @@ void fn_cd(inode_state &state, const wordvec &words) {
     if (words.size() > 2) {
         //error
     } else if (words.size() == 2) {
+        auto pathname =  split(words.at(1),"/");
         auto cwinode = state.get_cwd();
         auto content = cwinode.get()->get_contents();
         auto dir = dynamic_cast<directory *>(content.get());
         try {
-            auto ncwd = dir->get_dirents().at(words.at(1));
+            auto ncwd = dir->search(pathname,state);
             state.set_cwd(ncwd);
         } catch (exception &e) {
             cout << e.what();

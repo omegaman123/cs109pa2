@@ -245,10 +245,11 @@ void fn_rm(inode_state &state, const wordvec &words) {
     auto content = cwinode.get()->get_contents();
     auto dir = dynamic_cast<directory *>(content.get());
     auto dirmap = dir->get_dirents();
-    string s = words.at(1);
-    try {
-        auto cnt = dirmap[s].get()->get_contents();
+    wordvec pathname = split(words.at(1),"/");
+    string target = pathname.back();
 
+    try {
+        auto cnt = dir->search(pathname,state).get()->get_contents();
         if (dynamic_cast<directory *>(cnt.get()) != 0){
            auto del = dynamic_cast<directory *>(cnt.get());
             //dir
@@ -257,7 +258,7 @@ void fn_rm(inode_state &state, const wordvec &words) {
             }
 
         }
-        dirmap.erase(s);
+        dirmap.erase(target);
     }
     catch (exception& e){
     throw command_error(words.at(0) + ": not found");

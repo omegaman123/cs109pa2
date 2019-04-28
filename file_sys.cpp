@@ -98,6 +98,9 @@ file_error::file_error (const string& what):
 
 size_t plain_file::size() const {
     uint i = 0;
+    if (this->data.size() == 0){
+        return 0;
+    }
     for (string s: this->data){
     i += s.size();
     }
@@ -202,22 +205,25 @@ const inode_ptr directory::search(wordvec pathname, inode_state& state) {
     auto searchnode = state.get_cwd();
     string target = pathname.back();
     pathname.pop_back();
-    for (int i = 0; i < pathname.size(); ++i) {
+    for (uint i = 0; i < pathname.size(); ++i) {
         auto content = searchnode.get()->get_contents();
         auto dir = dynamic_cast<directory *>(content.get());
         auto dirmap = dir->get_dirents();
         try {
             searchnode = dirmap.at(pathname.at(i));
         } catch (exception& e){
-            //not found
+                //not found
+                return nullptr;
         }
     }
     auto searchdir = dynamic_cast<directory *>(searchnode.get()->get_contents().get());
     try{
         return searchdir->get_dirents().at(target);
     } catch (exception& e){
-
+        //no target found
+        return nullptr;
     }
+
 
 }
 

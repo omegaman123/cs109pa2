@@ -27,7 +27,7 @@ command_fn find_command_fn(const string &cmd) {
     DEBUGF ('c', "[" << cmd << "]");
     const auto result = cmd_hash.find(cmd);
     if (result == cmd_hash.end()) {
-        throw command_error(cmd + ": no such function");
+        throw command_error(cmd + ": no such function\n");
     }
     return result->second;
 }
@@ -48,26 +48,29 @@ void fn_cat(inode_state &state, const wordvec &words) {
     auto cwinode = state.get_cwd();
     auto content = cwinode.get()->get_contents();
     auto dir = dynamic_cast<directory *>(content.get());
-    if (words.size() > 2){
+    if (words.size() > 2) {
         throw exception{};
     }
-    auto pathname = split(words.at(1),"/");
+    auto pathname = split(words.at(1), "/");
     try {
-        auto dest = dir->search(pathname,state);
+        auto dest = dir->search(pathname, state);
+        if (dest == nullptr) {
+            throw command_error(words.at(0) + " " + words.at(1) + ": path not found\n");
+        }
         auto file = dynamic_cast<plain_file *>(dest.get()->get_contents().get());
-        if (file == nullptr){
+        if (file == nullptr) {
             cout << "not a file" << endl;
             return;
         }
         auto data = file->get_data();
         for (uint i = 0; i < data.size(); ++i) {
             cout << data.at(i);
-            if (i <data.size() - 1){
-                cout <<" ";
+            if (i < data.size() - 1) {
+                cout << " ";
             }
         }
         cout << endl;
-    } catch (out_of_range& e){
+    } catch (out_of_range &e) {
         cout << "file not found" << endl;
     }
 }
@@ -85,12 +88,20 @@ void fn_cd(inode_state &state, const wordvec &words) {
     if (words.size() > 2) {
         //error
     } else if (words.size() == 2) {
-        auto pathname =  split(words.at(1),"/");
+        auto pathname = split(words.at(1), "/");
         auto cwinode = state.get_cwd();
         auto content = cwinode.get()->get_contents();
         auto dir = dynamic_cast<directory *>(content.get());
+
         try {
-            auto ncwd = dir->search(pathname,state);
+            auto ncwd = dir->search(pathname, state);
+            if (ncwd == nullptr) {
+                throw command_error(words.at(0) + " " + words.at(1) + ": path not found\n");
+            }
+
+            if (dynamic_cast<directory *>(ncwd.get()->get_contents().get()) == nullptr) {
+                throw command_error(words.at(0) + " " + words.at(1) + ": is not a directory\n");
+            }
             state.set_cwd(ncwd);
         } catch (exception &e) {
             cout << e.what();
@@ -120,7 +131,7 @@ void fn_exit(inode_state &state, const wordvec &words) {
             exit_status::set(127);
         }
     } else {
-        throw command_error(words[0] + ": invalid number of arguments");
+        throw command_error(words[0] + ": invalid number of arguments\n");
     }
     throw ysh_exit();
 }
@@ -131,45 +142,67 @@ void fn_ls(inode_state &state, const wordvec &words) {
     auto cwinode = state.get_cwd();
     auto content = cwinode.get()->get_contents();
     auto dir = dynamic_cast<directory *>(content.get());
+
+
     if (words.size() > 1) {
-
-    } else {
-        auto dirents = dir->get_dirents();
-        if (cwinode.get()->get_inode_nr() == 1) {
-            cout << "/:" << endl;
-        } else {
-            auto rootnode = state.get_root();
-            auto currnode = state.get_cwd();
-            auto cnt = content;
-            auto currDir = dir;
-            wordvec v;
-            while (rootnode.get()->get_inode_nr() != currnode.get()->get_inode_nr()) {
-                cnt = currnode.get()->get_contents();
-                currDir = dynamic_cast<directory *>(cnt.get());
-                currnode = currDir->get_dirents().at("..");
-                v.push_back(currDir->get_name());
+        wordvec pathname = split(words.at(1), "/");
+        try {
+            auto ncwd = dir->search(pathname, state);
+            if (ncwd == nullptr) {
+                throw command_error(words.at(0) + " " + words.at(1) + ": path not found\n");
             }
 
-            for (int i = v.size() - 1; i >= 0; --i) {
-                cout << "/" << v.at(i) ;
+            if (dynamic_cast<directory *>(ncwd.get()->get_contents().get()) == nullptr) {
+                throw command_error(words.at(0) + " " + words.at(1) + ": is not a directory\n");
             }
-            cout <<  ":" << endl;
+            cwinode = ncwd;
+        } catch (exception &e) {
+            cout << e.what();
         }
-        for (auto it = dirents.begin(); it != dirents.end(); ++it) {
-            auto item = *it;
-            cout << right << setw(6) << item.second.get()->get_inode_nr() << "  " <<
-                 setw(6) << item.second.get()->get_contents().get()->size() << "  " <<
-                 left << item.first;
 
-            auto dr = dynamic_cast<directory *>(item.second.get()->get_contents().get());
-            if (dr != 0){
-                if (item.first != ".." and item.first != "."){
-                    cout << "/";
-                }
-            }
-                cout << endl;
-        }
     }
+
+     content = cwinode.get()->get_contents();
+     dir = dynamic_cast<directory *>(content.get());
+    auto dirents = dir->get_dirents();
+
+    if (cwinode.get()->get_inode_nr() == 1) {
+        cout << "/:" << endl;
+    } else {
+        auto rootnode = state.get_root();
+        auto currnode = state.get_cwd();
+        auto cnt = content;
+        auto currDir = dir;
+        wordvec v;
+//        while (rootnode.get()->get_inode_nr() != currnode.get()->get_inode_nr()) {
+//            cnt = currnode.get()->get_contents();
+//            currDir = dynamic_cast<directory *>(cnt.get());
+//            currnode = currDir->get_dirents().at("..");
+//            v.push_back(currDir->get_name());
+//        }
+//
+//        wordvec pathname = split(words.at(1), "/");
+//        for (int i = 0 ; i < pathname.size(); ++i) {
+//            cout << "/" << v.at(i);
+//        }
+
+        cout << ":" << endl;
+    }
+    for (auto it = dirents.begin(); it != dirents.end(); ++it) {
+        auto item = *it;
+        cout << right << setw(6) << item.second.get()->get_inode_nr() << "  " <<
+             setw(6) << item.second.get()->get_contents().get()->size() << "  " <<
+             left << item.first;
+
+        auto dr = dynamic_cast<directory *>(item.second.get()->get_contents().get());
+        if (dr != 0) {
+            if (item.first != ".." and item.first != ".") {
+                cout << "/";
+            }
+        }
+        cout << endl;
+    }
+
 }
 
 void fn_lsr(inode_state &state, const wordvec &words) {
@@ -231,7 +264,7 @@ void fn_pwd(inode_state &state, const wordvec &words) {
             }
 
             for (int i = v.size() - 1; i >= 0; --i) {
-                cout << "/" << v.at(i) ;
+                cout << "/" << v.at(i);
             }
             cout << endl;
         }
@@ -245,23 +278,27 @@ void fn_rm(inode_state &state, const wordvec &words) {
     auto content = cwinode.get()->get_contents();
     auto dir = dynamic_cast<directory *>(content.get());
     auto dirmap = dir->get_dirents();
-    wordvec pathname = split(words.at(1),"/");
+    wordvec pathname = split(words.at(1), "/");
     string target = pathname.back();
 
     try {
-        auto cnt = dir->search(pathname,state).get()->get_contents();
-        if (dynamic_cast<directory *>(cnt.get()) != 0){
-           auto del = dynamic_cast<directory *>(cnt.get());
+        auto searchdir = dir->search(pathname, state);
+        if (searchdir == nullptr) {
+            throw command_error(words.at(0) + " " + words.at(1) + ": path not found");
+        }
+        auto cnt = searchdir.get()->get_contents();
+        if (dynamic_cast<directory *>(cnt.get()) != 0) {
+            auto del = dynamic_cast<directory *>(cnt.get());
             //dir
-            if (del->size() > 2){
+            if (del->size() > 2) {
                 throw command_error(words.at(0) + ": dir not empty");
             }
 
         }
         dirmap.erase(target);
     }
-    catch (exception& e){
-    throw command_error(words.at(0) + ": not found");
+    catch (exception &e) {
+        throw command_error(words.at(0) + ": not found");
     }
 }
 

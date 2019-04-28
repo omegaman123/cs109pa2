@@ -201,6 +201,9 @@ void directory::remove(wordvec& pathname, inode_state& state) {
 }
 
 const inode_ptr directory::search(wordvec pathname, inode_state& state) {
+    if (pathname.size() == 0){
+        return state.get_cwd();
+    }
     auto cwinode = state.get_cwd();
     auto searchnode = state.get_cwd();
     string target = pathname.back();

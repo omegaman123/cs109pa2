@@ -145,7 +145,7 @@ class directory: public base_file {
       map<string,inode_ptr> dirents;
       string name;
    public:
-      void remove(wordvec &pathname, inode_state& state);
+      void clearDir();
       const string get_name();
       static inode_ptr mk_root_dir();
       virtual size_t size() const override;

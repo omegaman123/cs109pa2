@@ -356,22 +356,27 @@ void fn_rm(inode_state &state, const wordvec &words) {
     auto dirmap = dir->get_dirents();
     wordvec pathname = split(words.at(1), "/");
     string target = pathname.back();
+    pathname.pop_back();
 
     try {
         auto searchdir = dir->search(pathname, state);
         if (searchdir == nullptr) {
             throw command_error(words.at(0) + " " + words.at(1) + ": path not found");
         }
-        auto cnt = searchdir.get()->get_contents();
-        if (dynamic_cast<directory *>(cnt.get()) != 0) {
-            auto del = dynamic_cast<directory *>(cnt.get());
-            //dir
+
+        auto dr = dynamic_cast<directory* >(searchdir.get()->get_contents().get());
+        auto cnt = dr->get_dirents().at(target);
+        if (dynamic_cast<directory *>(cnt.get()->get_contents().get()) != 0) {
+            auto del = dynamic_cast<directory *>(cnt.get()->get_contents().get());
             if (del->size() > 2) {
                 throw command_error(words.at(0) + ": dir not empty");
             }
 
+
         }
-        dirmap.erase(target);
+            dr->remove(target);
+        
+
     }
     catch (exception &e) {
         throw command_error(words.at(0) + ": not found");

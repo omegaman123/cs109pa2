@@ -165,7 +165,22 @@ void directory::writefile(const wordvec &) {
 }
 
 void directory::remove(const string &filename) {
-    DEBUGF ('i', filename);
+
+    auto inode = this->dirents.at(filename);
+
+    auto fileOrDir = dynamic_cast<directory *>(inode.get()->get_contents().get());
+    if (fileOrDir != nullptr) {
+        auto dirents1 = fileOrDir->get_dirents();
+
+        dirents1["."].reset();
+        dirents1.erase(".");
+
+        dirents1[".."].reset();
+        dirents1.erase("..");
+    }
+
+    inode.reset();
+    dirents.erase(filename);
 }
 
 inode_ptr directory::mkdir(inode_ptr parent, const string &dirname) {
@@ -186,29 +201,6 @@ const string directory::get_name() {
     return this->name;
 }
 
-void directory::remove(wordvec &pathname, inode_state &state) {
-    auto cwinode = state.get_cwd();
-    auto content = cwinode.get()->get_contents();
-    auto dir = dynamic_cast<directory *>(content.get());
-    auto dirmap = dir->get_dirents();
-    string s = pathname.at(1);
-    try {
-        auto cnt = dirmap[s].get()->get_contents();
-
-        if (dynamic_cast<directory *>(cnt.get()) != 0) {
-            auto del = dynamic_cast<directory *>(cnt.get());
-            //dir
-            if (del->size() > 2) {
-                throw command_error(": dir not empty");
-            }
-
-        }
-        dirmap.erase(s);
-    }
-    catch (exception &e) {
-        throw command_error(pathname.at(0) + ": not found");
-    }
-}
 
 const inode_ptr directory::search(wordvec pathname, inode_state &state) {
     if (pathname.size() == 0) {
@@ -239,6 +231,7 @@ const inode_ptr directory::search(wordvec pathname, inode_state &state) {
 
 
 }
+
 
 inode_ptr directory::mkfile(const string &filename) {
     DEBUGF ('i', filename);

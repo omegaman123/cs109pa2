@@ -232,6 +232,10 @@ void fn_lsr(inode_state &state, const wordvec &words) {
         }
 
         cwinode = ncwd;
+        if (words.at(1) == "/") {
+            cwinode = state.get_root();
+
+        }
     }
 
     content = cwinode.get()->get_contents();
@@ -266,7 +270,7 @@ void fn_lsr(inode_state &state, const wordvec &words) {
         wordvec newords;
         inode_state nstate(state);
         nstate.set_cwd(dir->get_dirents().at(di));
-        fn_lsr(nstate,newords);
+        fn_lsr(nstate, newords);
     }
 }
 

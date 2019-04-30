@@ -297,7 +297,11 @@ void fn_make(inode_state &state, const wordvec &words) {
         auto newfile = targetptr.get()->get_contents().get()->mkfile(target);
         newfile.get()->get_contents().get()->writefile(words);
 
-    } catch (exception &e) {
+
+    } catch (command_error& e) {
+        throw command_error(e.what());
+    }
+    catch (exception &e) {
         throw command_error(words.at(0) + " " + words.at(1) + " :path does not exist\n");
     }
 }
@@ -390,6 +394,7 @@ void fn_rmr(inode_state &state, const wordvec &words) {
 
     if (words.size() > 1) {
         wordvec pathname = split(words.at(1), "/");
+        pathname.pop_back();
         auto ncwd = dir->search(pathname, state);
         if (ncwd == nullptr) {
             throw command_error(words.at(0) + " " + words.at(1) + ": path not found\n");

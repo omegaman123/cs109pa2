@@ -17,6 +17,7 @@ command_hash cmd_hash{
         {"prompt", fn_prompt},
         {"pwd",    fn_pwd},
         {"rm",     fn_rm},
+        {"rmr",     fn_rmr},
 };
 
 command_fn find_command_fn(const string &cmd) {
@@ -375,7 +376,7 @@ void fn_rm(inode_state &state, const wordvec &words) {
 
         }
             dr->remove(target);
-        
+
 
     }
     catch (exception &e) {
@@ -386,5 +387,48 @@ void fn_rm(inode_state &state, const wordvec &words) {
 void fn_rmr(inode_state &state, const wordvec &words) {
     DEBUGF ('c', state);
     DEBUGF ('c', words);
+    auto cwinode = state.get_cwd();
+    auto content = cwinode.get()->get_contents();
+    auto dir = dynamic_cast<directory *>(content.get());
+    auto dirmap = dir->get_dirents();
+    wordvec pathname = split(words.at(1), "/");
+    string target = pathname.back();
+    pathname.pop_back();
+
+    try {
+        auto searchdir = dir->search(pathname, state);
+        if (searchdir == nullptr) {
+            throw command_error(words.at(0) + " " + words.at(1) + ": path not found");
+        }
+
+        wordvec dirstack;
+        auto dr = dynamic_cast<directory* >(searchdir.get()->get_contents().get());
+        auto dirents = dr->get_dirents();
+
+        for (auto it = dirents.begin(); it != dirents.end(); ++it) {
+            auto item = *it;
+            auto d = dynamic_cast<directory *>(item.second.get()->get_contents().get());
+            if (d != 0) {
+                if (item.first != ".." and item.first != ".") {
+                    dirstack.push_back(item.first);
+                }
+            }
+        }
+
+        for (auto d: dirstack) {
+            wordvec newords;
+            inode_state nstate(state);
+            nstate.set_cwd(dir->get_dirents().at(d));
+            fn_rmr(nstate, newords);
+            dr->remove(d);
+        }
+
+
+
+
+    }
+    catch (exception &e) {
+        throw command_error(words.at(0) + ": not found");
+    }
 }
 

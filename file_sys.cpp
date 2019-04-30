@@ -138,7 +138,7 @@ void plain_file::remove(const string &) {
     throw file_error("is a plain file");
 }
 
-inode_ptr plain_file::mkdir(inode_ptr parent, const string &) {
+inode_ptr plain_file::mkdir(inode_ptr , const string &) {
     throw file_error("is a plain file");
 }
 
@@ -185,8 +185,8 @@ void directory::remove(const string &filename) {
 
 inode_ptr directory::mkdir(inode_ptr parent, const string &dirname) {
     DEBUGF ('i', dirname);
-
     inode_ptr dir(new inode(file_type::DIRECTORY_TYPE));
+
     this->dirents.insert(pair<string, inode_ptr>(dirname, dir));
 
     auto nd = dynamic_cast<directory *>(dir.get()->get_contents().get());

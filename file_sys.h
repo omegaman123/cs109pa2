@@ -95,7 +95,7 @@ class base_file {
       virtual const wordvec& readfile() const = 0;
       virtual void writefile (const wordvec& newdata) = 0;
       virtual void remove (const string& filename) = 0;
-      virtual inode_ptr mkdir (inode_ptr parent, const string& dirname) = 0;
+      virtual void mkdir (inode_ptr parent, const string& dirname) = 0;
       virtual inode_ptr mkfile (const string& filename) = 0;
 };
 
@@ -117,7 +117,7 @@ class plain_file: public base_file {
       virtual const wordvec& readfile() const override;
       virtual void writefile (const wordvec& newdata) override;
       virtual void remove (const string& filename) override;
-      virtual inode_ptr mkdir (inode_ptr parent, const string& dirname) override;
+      virtual void mkdir (inode_ptr parent, const string& dirname) override;
       virtual inode_ptr mkfile (const string& filename) override;
 };
 
@@ -152,7 +152,7 @@ class directory: public base_file {
       virtual const wordvec& readfile() const override;
       virtual void writefile (const wordvec& newdata) override;
       virtual void remove (const string& filename) override;
-      virtual inode_ptr mkdir (inode_ptr parent, const string& dirname) override;
+      virtual void mkdir (inode_ptr parent, const string& dirname) override;
       virtual inode_ptr mkfile (const string& filename) override;
        map<string,inode_ptr>& get_dirents() ;
        const inode_ptr search(wordvec pathname, inode_state& state);

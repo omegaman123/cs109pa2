@@ -138,7 +138,7 @@ void plain_file::remove(const string &) {
     throw file_error("is a plain file");
 }
 
-inode_ptr plain_file::mkdir(inode_ptr , const string &) {
+void plain_file::mkdir(inode_ptr , const string &) {
     throw file_error("is a plain file");
 }
 
@@ -183,9 +183,13 @@ void directory::remove(const string &filename) {
     dirents.erase(filename);
 }
 
-inode_ptr directory::mkdir(inode_ptr parent, const string &dirname) {
+void directory::mkdir(inode_ptr parent, const string& dirname) {
     DEBUGF ('i', dirname);
-    inode_ptr dir(new inode(file_type::DIRECTORY_TYPE));
+
+    if (this->dirents.find(dirname) != this->dirents.end()) {
+        throw command_error(dirname + ": file or dir already exists");
+    }
+    inode_ptr dir = make_shared<inode>(inode(file_type::DIRECTORY_TYPE));
 
     this->dirents.insert(pair<string, inode_ptr>(dirname, dir));
 
@@ -193,8 +197,6 @@ inode_ptr directory::mkdir(inode_ptr parent, const string &dirname) {
     nd->dirents["."] = dir;
     nd->dirents[".."] = parent;
     nd->name = dirname;
-
-    return dir;
 }
 
 const string directory::get_name() {
@@ -235,6 +237,10 @@ const inode_ptr directory::search(wordvec pathname, inode_state &state) {
 
 inode_ptr directory::mkfile(const string &filename) {
     DEBUGF ('i', filename);
+    if (this->dirents.find(filename) != this->dirents.end()) {
+        throw command_error(filename + ": file or dir already exists");
+    }
+
     inode_ptr file(new inode(file_type::PLAIN_TYPE));
     this->dirents[filename] = file;
     return file;

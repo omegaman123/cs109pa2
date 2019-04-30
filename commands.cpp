@@ -311,19 +311,16 @@ void fn_mkdir(inode_state &state, const wordvec &words) {
     wordvec pathname = split(words.at(1), "/");
     string target = pathname.back();
     pathname.pop_back();
-    try {
-        auto tar = dir->search(pathname, state);
 
-        if (tar == nullptr) {
-            throw command_error(words.at(1) + " : path not found");
-        }
-        if (dynamic_cast<directory *>(tar.get()->get_contents().get()) == 0) {
-            throw command_error(words.at(1) + " : is not a directory");
-        }
-        tar.get()->get_contents().get()->mkdir(tar, target);
-    } catch (exception &e) {
+    auto tar = dir->search(pathname, state);
 
+    if (tar == nullptr) {
+        throw command_error(words.at(1) + " : path not found");
     }
+    if (dynamic_cast<directory *>(tar.get()->get_contents().get()) == 0) {
+        throw command_error(words.at(1) + " : is not a directory");
+    }
+    tar.get()->get_contents().get()->mkdir(tar, target);
 }
 
 void fn_prompt(inode_state &state, const wordvec &words) {
@@ -390,45 +387,52 @@ void fn_rmr(inode_state &state, const wordvec &words) {
     auto cwinode = state.get_cwd();
     auto content = cwinode.get()->get_contents();
     auto dir = dynamic_cast<directory *>(content.get());
-    auto dirmap = dir->get_dirents();
-    wordvec pathname = split(words.at(1), "/");
-    string target = pathname.back();
-    pathname.pop_back();
 
-    try {
-        auto searchdir = dir->search(pathname, state);
-        if (searchdir == nullptr) {
-            throw command_error(words.at(0) + " " + words.at(1) + ": path not found");
+    if (words.size() > 1) {
+        wordvec pathname = split(words.at(1), "/");
+        auto ncwd = dir->search(pathname, state);
+        if (ncwd == nullptr) {
+            throw command_error(words.at(0) + " " + words.at(1) + ": path not found\n");
         }
 
-        wordvec dirstack;
-        auto dr = dynamic_cast<directory* >(searchdir.get()->get_contents().get());
-        auto dirents = dr->get_dirents();
+        if (dynamic_cast<directory *>(ncwd.get()->get_contents().get()) == nullptr) {
+            throw command_error(words.at(0) + " " + words.at(1) + ": is not a directory\n");
+        }
 
-        for (auto it = dirents.begin(); it != dirents.end(); ++it) {
-            auto item = *it;
-            auto d = dynamic_cast<directory *>(item.second.get()->get_contents().get());
-            if (d != 0) {
-                if (item.first != ".." and item.first != ".") {
-                    dirstack.push_back(item.first);
-                }
+        cwinode = ncwd;
+
+    }
+
+    content = cwinode.get()->get_contents();
+    dir = dynamic_cast<directory *>(content.get());
+    auto dirents = dir->get_dirents();
+
+
+    wordvec dirstack;
+    for (auto it = dirents.begin(); it != dirents.end(); ++it) {
+        auto item = *it;
+
+
+        auto dr = dynamic_cast<directory *>(item.second.get()->get_contents().get());
+        if (dr != 0) {
+            if (item.first != ".." and item.first != ".") {
+
+                dirstack.push_back(dr->get_name());
             }
+        } else {
+            dir->remove(item.first);
         }
-
-        for (auto d: dirstack) {
-            wordvec newords;
-            inode_state nstate(state);
-            nstate.set_cwd(dir->get_dirents().at(d));
-            fn_rmr(nstate, newords);
-            dr->remove(d);
-        }
-
-
-
-
     }
-    catch (exception &e) {
-        throw command_error(words.at(0) + ": not found");
+
+    for (auto d : dirstack) {
+        wordvec newords;
+        inode_state nstate(state);
+        nstate.set_cwd(dir->get_dirents().at(d));
+        fn_rmr(nstate, newords);
+        dir->remove(d);
     }
+
+
+
 }
 
